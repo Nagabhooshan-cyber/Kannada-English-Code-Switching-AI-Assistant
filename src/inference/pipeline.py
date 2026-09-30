@@ -12,6 +12,7 @@ import regex as unicode_regex
 from src.inference.entity_extractor import extract_entities
 from src.data.coli import load_config
 from src.models.normalizer import LexiconNormalizer
+from src.models.openai_translator import OpenAITranslator
 from src.models.roman_kannada import COMMON_WORDS, RomanKannadaConverter
 from src.models.translator import IndicTransTranslator, TranslationUnavailableError
 from src.support.ai_support import GeminiSupport
@@ -76,6 +77,7 @@ class AssistantPipeline:
         translation_config_path = project_root / "configs/translation.yaml"
         translation_config = load_config(translation_config_path) if translation_config_path.is_file() else {}
         self.translator = IndicTransTranslator(project_root, translation_config)
+        self.openai_translator = OpenAITranslator()
 
         baseline_path = project_root / "models/language_id_baseline.joblib"
         transformer_path = project_root / "models/language_id_transformer"
@@ -170,44 +172,6 @@ class AssistantPipeline:
             confidences[eligible[word_id]] = float(probabilities[subword_index])
         return labels, confidences
 
-    @staticmethod
-    def _polish_known_english_frame(
-        source_text: str, translated_text: str, source_language: str, target_language: str,
-    ) -> str:
-        """Supply a natural English frame where colloquial Kannada omits the subject."""
-        source = source_language.casefold()
-        target = target_language.casefold()
-        route_question = unicode_regex.fullmatch(
-            r"\s*[\w\u0c80-\u0cff]+(?:[- ](?:ಗೆ|ge))\s+(?:ಹೇಗೆ|hege)\s+(?:ಹೋಗ\w*|hog\w*)\s*[?!.]*\s*",
-            source_text.strip(), flags=unicode_regex.IGNORECASE,
-        )
-        if route_question and source in {"kn", "kannada", "kan_knda"} and target in {"en", "english", "eng_latn"}:
-            destination = extract_entities(source_text)["destination"]
-            if destination:
-                return f"How do I get to {destination['value']}?"
-        do_suffix = unicode_regex.search(
-            r"(?i)(?:^|\s)(?:maadabeku|madabeku|maadbeku|madbeku)\s*[.!?]*$",
-            source_text.strip(),
-        )
-        if source not in {"kn", "kannada", "kan_knda"} or target not in {"en", "english", "eng_latn"} or not do_suffix:
-            return translated_text
-        activity = extract_entities(source_text)["activity"]
-        if not activity:
-            return translated_text
-        action = {
-            "assignment": "completed", "appointment": "scheduled", "class": "held",
-            "exam": "taken", "homework": "completed", "interview": "held",
-            "meeting": "held", "office": "attended", "presentation": "given",
-            "project": "completed", "report": "prepared", "shopping": "done",
-            "task": "completed", "work": "done",
-        }.get(activity["value"].casefold())
-        if not action:
-            return translated_text
-        date = extract_entities(source_text)["date"]
-        when = f" {date['value']}" if date else ""
-        article = "An" if activity["value"].casefold().startswith(("appointment", "exam")) else "A"
-        return f"{article} {activity['value']} needs to be {action}{when}."
-
     def process(
         self,
         text: str,
@@ -246,14 +210,21 @@ class AssistantPipeline:
         if request_translation:
             try:
                 source_text = normalized["text"] if source_language.casefold() in {"kn", "kannada", "kan_knda"} else text
-                translated_text = self.translator.translate(
-                    text, source_language, target_language, normalized_source=source_text,
-                )
-                translated_text = self._polish_known_english_frame(
-                    text, translated_text, source_language, target_language,
-                )
+                translation_backend = os.getenv("TRANSLATION_BACKEND", "openai").strip().casefold()
+                if translation_backend == "openai":
+                    translated_text = self.openai_translator.translate(
+                        text, source_language, target_language, normalized_source=source_text,
+                    )
+                elif translation_backend == "indictrans":
+                    translated_text = self.translator.translate(
+                        text, source_language, target_language, normalized_source=source_text,
+                    )
+                else:
+                    raise TranslationUnavailableError(
+                        "TRANSLATION_BACKEND must be 'openai' or 'indictrans'."
+                    )
                 translation = {
-                    "status": "translated", "source_language": source_language,
+                    "status": "translated", "backend": translation_backend, "source_language": source_language,
                     "target_language": target_language, "text": translated_text,
                 }
             except TranslationUnavailableError as error:

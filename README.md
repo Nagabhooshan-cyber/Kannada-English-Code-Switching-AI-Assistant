@@ -18,13 +18,13 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-The base installation includes the FastAPI site and optional Gemini support (which stays idle without an API key). Transformer training and translation runtime dependencies remain optional and are listed as comments or in `requirements-translation.txt`.
+The base installation includes the FastAPI site, optional Gemini support, and the OpenAI SDK for API-backed translation. IndicTrans2's large local inference dependencies remain optional and are listed in `requirements-translation.txt`.
 
 For local Hugging Face access, copy `.env.example` to `.env` and put your read token in `HF_TOKEN`, or authenticate with `hf auth login`. The `.env` file is ignored by Git. Never paste a token into source code, a notebook, a public issue, or a chat. For hosted deployments, configure `HF_TOKEN` in the hosting provider's private environment/secrets settings; do not upload `.env`.
 
 ### Optional Gemini AI support
 
-The local models and rules remain the primary language identification, normalization, intent, entity, and translation components. After they run, a small uncertainty check may ask Gemini for a second opinion about unknown/low-confidence words or likely named entities. Gemini cannot supply the user-facing translation, intent, or a conversational answer. High-confidence support may refine a language label or add a supported named entity; weak or unavailable support leaves local results in place.
+The local models and rules remain the primary language identification, normalization, intent, and entity components. Translation uses OpenAI by default to avoid loading a large model on small hosted instances. After local analysis, a small uncertainty check may ask Gemini for a second opinion about unknown/low-confidence words or likely named entities. Gemini cannot supply the user-facing translation, intent, or a conversational answer. High-confidence support may refine a language label or add a supported named entity; weak or unavailable support leaves local results in place.
 
 Copy `.env.example` to `.env` and add a Gemini API key obtained from Google AI Studio as `GEMINI_API_KEY`. Optionally set `GEMINI_MODEL`; the default is `gemini-3.8-flash`. The key is read only by the backend and must never be committed, placed in browser code, or included in a deployment image. `.env` is gitignored. Google Search grounding is enabled only when a likely proper noun or entity needs outside identification; ordinary confident words do not trigger search. Search results are used as entity evidence, not as a general search or question-answering feature.
 
@@ -42,7 +42,7 @@ The exploration report includes example/token counts, observed class and token d
 
 ## Project status
 
-Implemented: data preparation and exploration, character n-gram and MuRIL training scripts, starter normalization/intent/entity components, optional IndicTrans2 translation, a local web interface/API, and optional Gemini support. Evaluation summaries are in `reports/`. This checkout does not include source datasets or trained model weights, so training and some model-backed features require the user to supply the licensed data and model artifacts. Docker preparation is included; public hosting still requires a host and its private secrets/artifact configuration.
+Implemented: data preparation and exploration, character n-gram and MuRIL training scripts, starter normalization/intent/entity components, OpenAI API translation, optional local IndicTrans2 translation, a local web interface/API, and optional Gemini support. Evaluation summaries are in `reports/`. This checkout does not include source datasets or trained model weights, so training and some model-backed features require the user to supply the licensed data and model artifacts. Docker preparation is included; hosted translation needs a private `OPENAI_API_KEY` secret.
 
 Run the baseline with:
 
@@ -129,17 +129,15 @@ python scripts/extract_entities.py "Nale report complete madbeku"
 
 It currently recognizes a small set of relative dates, numeric times, common activities, route destinations marked with `-ge`/`ge`, and query topics. Simple `place-ge hege hogodu?` route questions receive the natural English frame “How do I get to [place]?” Time expressions without AM/PM are marked ambiguous; extracted spans include character offsets. This is a starter component and has not been evaluated against a manually annotated entity set.
 
-## Optional Kannada–English translation
+## Kannada–English translation
 
-The translation adapter uses AI4Bharat IndicTrans2's distilled 200M checkpoints: `ai4bharat/indictrans2-en-indic-dist-200M` and `ai4bharat/indictrans2-indic-en-dist-200M`. Configure checkpoint names and language codes in `configs/translation.yaml`. Translation loads lazily only when requested. Install the optional inference stack with `python -m pip install -r requirements-translation.txt`; the PyTorch checkpoint downloads on the first translation request and is cached under ignored `models/translation_cache/`.
+The app uses the OpenAI Responses API for translation by default, which avoids loading large model weights on small hosting instances. Copy `.env.example` to `.env`, set `OPENAI_API_KEY`, and optionally set `OPENAI_MODEL` (default: `gpt-4o-mini`). On Render, add these as private environment variables; never put the key in frontend code or commit it. Translation sends the submitted sentence and its local Kannada-script hint to OpenAI, so API usage may be billed and user text is shared with the provider. The API call sets `store=False`; review the provider's current data controls before sending sensitive text.
 
 ```powershell
-python scripts/translate.py "How are you?" --source-language en --target-language kn
-python scripts/translate.py "ನೀವು ಹೇಗಿದ್ದೀರಿ?" --source-language kn --target-language en
-python scripts/run_pipeline.py "ನಾಳೆ ಸಭೆಗೆ ಹೋಗಬೇಕು" --translate --source-language kn --target-language en
+python scripts/run_pipeline.py "Nale meeting-ge hogbeku" --translate --source-language kn --target-language en
 ```
 
-The Hugging Face model repositories require access conditions to be accepted, and the local `.env` must contain `HF_TOKEN` (or use `hf auth login`). The official Cython toolkit documents Linux/macOS support; on Windows, this project uses a small Python processor for Kannada/English normalization, tokenization, and script conversion. A local inference run translated `ನೀವು ಹೇಗಿದ್ದೀರಿ?` as “how are you.” Romanized Kannada is converted to Kannada script locally before translation. English words in mixed text are kept in English based on language-ID labels except for known loanwords. Common activity-plus-`maadabeku` inputs are rendered with a neutral, grammatical English frame (for example, “A meeting needs to be held tomorrow.”) to restore the subject omitted in colloquial Kannada. Other sentences use IndicTrans2 directly and may need review. See [IndicTrans2](https://github.com/AI4Bharat/IndicTrans2), the [Kannada-to-English checkpoint](https://huggingface.co/ai4bharat/indictrans2-indic-en-dist-200M), and the [English-to-Indic checkpoint](https://huggingface.co/ai4bharat/indictrans2-en-indic-dist-200M).
+For a local IndicTrans2 alternative, set `TRANSLATION_BACKEND=indictrans`, install `requirements-translation.txt`, accept the Hugging Face checkpoint access conditions, and configure `HF_TOKEN`. This backend downloads and runs large local checkpoints and is unsuitable for Render's 512 MB free instance. The hosted default (`TRANSLATION_BACKEND=openai`) does not need the IndicTrans2 dependencies.
 
 ## HTTP API
 
@@ -160,9 +158,9 @@ Open `http://127.0.0.1:8000/` for the user interface or `http://127.0.0.1:8000/d
 }
 ```
 
-For deployment, use the start command `uvicorn src.api.main:app --host 0.0.0.0 --port $PORT` where the hosting provider supplies `PORT`. Set `GEMINI_API_KEY`, `HF_TOKEN` when needed, and optionally `GEMINI_MODEL`/`LANGUAGE_BACKEND` in the host's private environment settings. Do not upload `.env`. The service code is in `src/api/main.py`.
+For deployment, use the start command `uvicorn src.api.main:app --host 0.0.0.0 --port $PORT` where the hosting provider supplies `PORT`. Set `OPENAI_API_KEY` for hosted translation and `GEMINI_API_KEY` for optional uncertainty support. Set `HF_TOKEN` only when needed, and optionally configure `OPENAI_MODEL`, `GEMINI_MODEL`, or `LANGUAGE_BACKEND` in the host's private environment settings. Do not upload `.env`. The service code is in `src/api/main.py`.
 
-The web interface and API are implemented, but actual hosting still requires choosing a host and making the trained language-ID model available there. Model weights and datasets stay out of Git; a fresh clone therefore reports missing language models until they are supplied through an appropriate deployment artifact or model registry. Translation also depends on the gated checkpoint download and the platform's compatibility with IndicTransToolkit. Check dataset licenses before distributing dataset files separately.
+The web interface and API are implemented. Model weights and datasets stay out of Git; a fresh clone therefore reports missing language models until they are supplied through an appropriate deployment artifact or model registry. The default hosted translation uses the OpenAI API; local IndicTrans2 remains optional and requires gated checkpoint access. Check dataset licenses before distributing dataset files separately.
 
 ### Container deployment preparation
 
