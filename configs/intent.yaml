@@ -1,0 +1,20 @@
+raw_dir: data/raw/intent
+processed_dir: data/processed/intent
+model_path: models/intent_baseline.joblib
+metrics_path: reports/evaluation/intent_baseline.json
+allowed_intents:
+  - task_planning
+  - reminder
+  - translation_request
+  - directions
+  - weather_query
+  - schedule_query
+  - information_query
+  - shopping
+  - greeting
+  - general_conversation
+split:
+  train: 0.8
+  validation: 0.1
+  test: 0.1
+  seed: 42

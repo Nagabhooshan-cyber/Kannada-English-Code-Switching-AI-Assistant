@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f7f3">
+  <title>ಕಂGlish | Kannada + English Assistant</title>
+  <style>
+    :root { color-scheme: light; --ink:#1b2925; --muted:#68736d; --green:#176b52; --line:#e5e7df; --paper:#fff; --bg:#f8f7f3; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    header { border-bottom:1px solid var(--line); background:rgba(255,255,255,.78); }
+    .nav { max-width:980px; margin:auto; padding:18px 24px; display:flex; align-items:center; justify-content:space-between; }
+    .brand { display:flex; align-items:center; gap:3px; font-weight:800; letter-spacing:-.045em; font-size:22px; }
+    .brand-kn { color:white; background:var(--green); padding:2px 7px 4px; border-radius:9px; line-height:1.15; font-size:18px; letter-spacing:-.02em; }
+    .brand-en { background:linear-gradient(110deg,#176b52,#359b78); color:transparent; background-clip:text; -webkit-background-clip:text; }
+    a { color:var(--green); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    main { max-width:900px; margin:54px auto; padding:0 24px 64px; }
+    .intro { margin-bottom:28px; }
+    .eyebrow { color:var(--green); font-size:12px; text-transform:uppercase; font-weight:750; letter-spacing:.13em; }
+    h1 { font-size:clamp(30px,5vw,46px); line-height:1.12; letter-spacing:-.045em; margin:10px 0 12px; }
+    .intro p { color:var(--muted); max-width:650px; margin:0; }
+    .card { background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:24px; box-shadow:0 8px 28px rgba(27,41,37,.045); }
+    label { display:block; font-weight:650; margin-bottom:8px; }
+    textarea { width:100%; min-height:146px; resize:vertical; border:1px solid #cfd5ce; border-radius:12px; padding:14px 15px; font:inherit; color:var(--ink); outline:none; }
+    textarea:focus, select:focus { border-color:var(--green); box-shadow:0 0 0 3px #176b5220; }
+    .help, .count { color:var(--muted); font-size:13px; }
+    .input-meta { display:flex; justify-content:space-between; gap:12px; margin-top:7px; }
+    .options { display:flex; align-items:center; gap:12px; margin:20px 0; flex-wrap:wrap; }
+    .check { display:flex; gap:9px; align-items:center; margin:0; font-weight:550; }
+    .check input { width:18px; height:18px; accent-color:var(--green); }
+    .languages { display:none; align-items:end; gap:12px; flex-wrap:wrap; margin:0 0 20px; }
+    .languages.visible { display:flex; }
+    .languages label { margin:0; font-size:13px; }
+    select { display:block; margin-top:5px; min-width:180px; border:1px solid #cfd5ce; border-radius:9px; background:white; padding:10px 12px; font:inherit; }
+    button { border:0; border-radius:10px; padding:12px 19px; color:white; background:var(--green); font:inherit; font-weight:700; cursor:pointer; }
+    button:hover { background:#10553f; }
+    button:disabled { opacity:.6; cursor:wait; }
+    .result { display:none; margin-top:24px; }
+    .result.visible { display:block; }
+    .result-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; }
+    h2 { font-size:20px; letter-spacing:-.02em; margin:0; }
+    .status { border-radius:999px; padding:4px 10px; background:#e8f4ee; color:#176b52; font-size:12px; font-weight:700; }
+    .status.warn { background:#fff2d8; color:#78530b; }
+    .translation { background:#f1f6f2; border-radius:12px; padding:15px; margin:12px 0; }
+    .translation strong, .small-title { display:block; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
+    .translation p { margin:0; font-size:19px; }
+    .grounding { margin:12px 0; }
+    .grounding p { margin:0; white-space:pre-wrap; }
+    .grounding ul { margin:9px 0 0; padding-left:20px; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:14px; }
+    .tile { border:1px solid var(--line); border-radius:12px; padding:14px; min-width:0; }
+    .tile p { margin:0; overflow-wrap:anywhere; }
+    .tokens { margin-top:16px; }
+    .chips { display:flex; flex-wrap:wrap; gap:7px; margin-top:8px; }
+    .chip { display:inline-flex; gap:6px; align-items:center; border:1px solid var(--line); border-radius:999px; padding:5px 10px; font-size:13px; }
+    .chip small { color:var(--muted); }
+    details { margin-top:16px; color:var(--muted); font-size:13px; }
+    pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#f6f7f4; border-radius:10px; padding:14px; color:var(--ink); }
+    .error { color:#a12b23; background:#fff0ee; border-radius:10px; padding:12px 14px; margin-top:14px; }
+    footer { margin-top:24px; color:var(--muted); font-size:13px; }
+    @media (max-width:620px) { main { margin-top:34px; padding-inline:16px; } .nav { padding-inline:16px; } .card { padding:17px; } .grid { grid-template-columns:1fr; } .languages { align-items:stretch; } select { min-width:0; width:100%; } }
+  </style>
+</head>
+<body>
+  <header><div class="nav"><div class="brand" aria-label="ಕಂGlish"><span class="brand-kn">ಕಂ</span><span class="brand-en">Glish</span></div></div></header>
+  <main>
+    <section class="intro">
+      <div class="eyebrow">Language assistant</div>
+      <h1>Understand your Kannada–English mix.</h1>
+      <p>Enter a sentence in Kannada, Romanized Kannada, English, or a mix. The assistant identifies words, finds useful details, and can request a translation.</p>
+    </section>
+    <section class="card" aria-label="Text assistant">
+      <form id="assistant-form">
+        <label for="text">Your text</label>
+        <textarea id="text" maxlength="2000" required spellcheck="false" autocorrect="off" autocapitalize="off" placeholder="For example: Nale meeting-ge hogbeku, please remind me"></textarea>
+        <div class="input-meta"><span class="help">Up to 2,000 characters</span><span class="count" id="count">0 / 2000</span></div>
+        <div class="options">
+          <label class="check"><input id="translate" type="checkbox"> Translate this text</label>
+          <button id="submit" type="submit">Analyze text</button>
+        </div>
+        <div id="languages" class="languages">
+          <label>From
+            <select id="source"><option value="kn">Kannada</option><option value="en">English</option></select>
+          </label>
+          <label>To
+            <select id="target"><option value="en">English</option><option value="kn">Kannada</option></select>
+          </label>
+        </div>
+      </form>
+      <div id="error" class="error" role="alert" hidden></div>
+      <section id="result" class="result" aria-live="polite">
+        <div class="result-head"><h2>Results</h2><span id="overall-status" class="status">Ready</span></div>
+        <div id="translation-box" class="translation" hidden><strong>Translation</strong><p id="translation-text"></p></div>
+        <div id="support-box" class="tile grounding" hidden><span class="small-title">AI support</span><p id="support-text"></p><ul id="support-sources" hidden></ul></div>
+        <div class="grid">
+          <div class="tile"><span class="small-title">Language detection</span><p id="language-summary"></p></div>
+          <div class="tile"><span class="small-title">Kannada script</span><p id="normalization-summary"></p></div>
+          <div class="tile"><span class="small-title">Intent</span><p id="intent-summary"></p></div>
+          <div class="tile"><span class="small-title">Details found</span><p id="entities-summary"></p></div>
+        </div>
+        <div class="tokens"><span class="small-title">Words and detected language</span><div id="tokens" class="chips"></div></div>
+      </section>
+    </section>
+    <footer>© Nagabhooshan Bhat 2026. All rights reserved.</footer>
+  </main>
+  <script>
+    const form = document.querySelector('#assistant-form');
+    const textInput = document.querySelector('#text');
+    const translateInput = document.querySelector('#translate');
+    const languages = document.querySelector('#languages');
+    const button = document.querySelector('#submit');
+    const result = document.querySelector('#result');
+    const errorBox = document.querySelector('#error');
+    const count = document.querySelector('#count');
+    const titleCase = value => value.replaceAll('_', ' ').replace(/\b\w/g, char => char.toUpperCase());
+
+    textInput.addEventListener('input', () => { count.textContent = `${textInput.value.length} / 2000`; });
+    translateInput.addEventListener('change', () => languages.classList.toggle('visible', translateInput.checked));
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      errorBox.hidden = true;
+      result.classList.remove('visible');
+      button.disabled = true;
+      button.textContent = 'Working…';
+      try {
+        const response = await fetch('/v1/process', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            text: textInput.value.trim(), translate: translateInput.checked,
+            source_language: document.querySelector('#source').value,
+            target_language: document.querySelector('#target').value
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'The request could not be completed.');
+
+        const componentStatuses = Object.values(data.component_status || {});
+        const allReady = componentStatuses.every(status => !String(status).includes('awaiting') && status !== 'unavailable');
+        const badge = document.querySelector('#overall-status');
+        badge.textContent = allReady ? 'Analysis complete' : 'Some features are limited';
+        badge.classList.toggle('warn', !allReady);
+        const labels = [...new Set((data.tokens || []).map(token => token.language))];
+        document.querySelector('#language-summary').textContent = labels.length ? labels.map(titleCase).join(', ') : 'No words found';
+        document.querySelector('#normalization-summary').textContent = data.normalized_kannada ?? '';
+        document.querySelector('#intent-summary').textContent = data.intent?.label ? titleCase(data.intent.label) : 'Feature coming soon';
+        const aiDetails = [];
+        const entities = Object.entries(data.entities || {}).filter(([key, value]) => key !== 'details' && value);
+        const detailText = aiDetails.length
+          ? aiDetails.map(item => `${titleCase(item.type)}: ${item.value}${item.kannada ? ` (${item.kannada})` : ''}${item.explanation ? ` — ${item.explanation}` : ''}`).join(' · ')
+          : entities.map(([key, value]) => key === 'named_entities' && Array.isArray(value)
+            ? value.map(item => `${titleCase(item.entity_type)}: ${item.value}`).join(' · ')
+            : `${titleCase(key)}: ${value.value ?? value.raw ?? JSON.stringify(value)}`).join(' · ');
+        document.querySelector('#entities-summary').textContent = detailText || 'No matching details found';
+
+        const tokenList = document.querySelector('#tokens');
+        tokenList.replaceChildren();
+        (data.tokens || []).forEach(token => {
+          const chip = document.createElement('span'); chip.className = 'chip';
+          const word = document.createElement('span'); word.textContent = token.text;
+          const tag = document.createElement('small'); tag.textContent = titleCase(token.language);
+          chip.append(word, tag); tokenList.append(chip);
+        });
+        const translationBox = document.querySelector('#translation-box');
+        translationBox.hidden = !data.translation;
+        if (data.translation) {
+          document.querySelector('#translation-text').textContent = data.translation.text || data.translation.message || 'Translation unavailable';
+          if (data.translation.status !== 'translated') { badge.textContent = 'Translation unavailable'; badge.classList.add('warn'); }
+        }
+        const support = data.ai_support;
+        const supportBox = document.querySelector('#support-box');
+        supportBox.hidden = !support;
+        const supportText = document.querySelector('#support-text');
+        const supported = [...(support?.entity_support || []).filter(item => item.applied),
+          ...(support?.romanization_support || []).filter(item => item.confidence >= .95)];
+        supportText.textContent = supported.length
+          ? supported.map(item => item.entity_type
+              ? `${item.text} → ${titleCase(item.entity_type)} ✓`
+              : `${item.token} → likely Romanized Kannada ✓`).join(' · ')
+          : (support?.status === 'unavailable' ? 'AI support unavailable.' : 'No high-confidence support to show.');
+        const aiSources = document.querySelector('#support-sources');
+        aiSources.replaceChildren();
+        const sources = support?.sources || [];
+        aiSources.hidden = !sources.length;
+        sources.forEach(source => {
+          try {
+            const url = new URL(source.url);
+            if (!['http:', 'https:'].includes(url.protocol)) return;
+            const item = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = url.href; link.target = '_blank'; link.rel = 'noopener noreferrer';
+            link.textContent = source.title || url.hostname;
+            item.append(link); aiSources.append(item);
+          } catch (_) { /* Ignore malformed citations. */ }
+        });
+        result.classList.add('visible');
+      } catch (error) {
+        errorBox.textContent = error.message || 'Something went wrong. Please try again.';
+        errorBox.hidden = false;
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Analyze text';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+data_dir: data/processed/language_id
+official_test_path: data/raw/Test_withLabels_Kanglish.csv
+model_name: google/muril-base-cased
+output_dir: models/language_id_transformer
+metrics_path: reports/evaluation/language_id_transformer.json
+seed: 42
+epochs: 2
+batch_size: 16
+learning_rate: 0.00002
+weight_decay: 0.01
+max_length: 64
+max_grad_norm: 1.0

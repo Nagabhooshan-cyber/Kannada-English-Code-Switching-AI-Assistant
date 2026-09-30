@@ -1,0 +1,12 @@
+models:
+  en_to_kn: ai4bharat/indictrans2-en-indic-dist-200M
+  kn_to_en: ai4bharat/indictrans2-indic-en-dist-200M
+language_codes:
+  en: eng_Latn
+  kn: kan_Knda
+device: auto
+cache_dir: models/translation_cache
+max_input_chars: 2000
+max_length: 256
+num_beams: 5
+use_cache: false

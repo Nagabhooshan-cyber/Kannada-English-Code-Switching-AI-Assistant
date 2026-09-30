@@ -1,0 +1,15 @@
+data_dir: data/processed/language_id
+official_test_path: data/raw/Test_withLabels_Kanglish.csv
+model_path: models/language_id_baseline.joblib
+metrics_path: reports/evaluation/language_id_baseline.json
+seed: 42
+
+vectorizer:
+  analyzer: char
+  ngram_min: 2
+  ngram_max: 5
+  sublinear_tf: true
+
+classifier:
+  max_iter: 2000
+  class_weight: null

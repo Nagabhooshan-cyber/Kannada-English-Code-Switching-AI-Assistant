@@ -1,0 +1,8 @@
+raw_dir: data/raw/normalization
+processed_dir: data/processed/normalization
+report_path: reports/data_exploration/normalization_data.json
+split:
+  train: 0.8
+  validation: 0.1
+  test: 0.1
+  seed: 42

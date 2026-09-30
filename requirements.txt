@@ -1,0 +1,19 @@
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.4
+PyYAML>=6.0
+regex>=2023.12.25
+python-dotenv>=1.0
+google-genai>=2.25.0
+fastapi>=0.110
+uvicorn[standard]>=0.27
+
+# Install only for phases that need them:
+# torch>=2.2
+# transformers>=4.51 (recommended by the current IndicTransToolkit)
+# huggingface_hub>=0.23,<1.0
+# accelerate>=0.27,<1.0
+# indictranstoolkit (official toolkit currently targets Linux/macOS)
+# datasets>=2.18
+# sentencepiece>=0.2
+# streamlit>=1.32

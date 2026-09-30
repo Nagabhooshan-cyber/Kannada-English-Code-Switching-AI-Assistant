@@ -1,0 +1,371 @@
+{
+  "model": "google/muril-base-cased",
+  "device": "cpu",
+  "epochs": 2,
+  "epoch_mean_training_loss": [
+    1.5146720641682048,
+    1.1500685298878381
+  ],
+  "training_examples": 11815,
+  "labels": [
+    "en",
+    "kn",
+    "location",
+    "mixed",
+    "name",
+    "other"
+  ],
+  "validation": {
+    "examples": 1477,
+    "accuracy": 0.7447528774542993,
+    "macro_precision": 0.420161759243939,
+    "macro_recall": 0.4216774696759904,
+    "macro_f1": 0.40957220270688244,
+    "weighted_f1": 0.6821933403302585,
+    "classes": [
+      "en",
+      "kn",
+      "location",
+      "mixed",
+      "name",
+      "other"
+    ],
+    "classification_report": {
+      "en": {
+        "precision": 0.8479657387580299,
+        "recall": 0.8646288209606987,
+        "f1-score": 0.8562162162162162,
+        "support": 458.0
+      },
+      "kn": {
+        "precision": 0.6794150731158605,
+        "recall": 0.9572107765451664,
+        "f1-score": 0.7947368421052632,
+        "support": 631.0
+      },
+      "location": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 12.0
+      },
+      "mixed": {
+        "precision": 0.9166666666666666,
+        "recall": 0.7021276595744681,
+        "f1-score": 0.7951807228915663,
+        "support": 141.0
+      },
+      "name": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 71.0
+      },
+      "other": {
+        "precision": 0.07692307692307693,
+        "recall": 0.006097560975609756,
+        "f1-score": 0.011299435028248588,
+        "support": 164.0
+      },
+      "accuracy": 0.7447528774542993,
+      "macro avg": {
+        "precision": 0.420161759243939,
+        "recall": 0.4216774696759904,
+        "f1-score": 0.40957220270688244,
+        "support": 1477.0
+      },
+      "weighted avg": {
+        "precision": 0.6492515938406704,
+        "recall": 0.7447528774542993,
+        "f1-score": 0.6821933403302585,
+        "support": 1477.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        396,
+        55,
+        0,
+        3,
+        0,
+        4
+      ],
+      [
+        21,
+        604,
+        0,
+        2,
+        0,
+        4
+      ],
+      [
+        5,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        5,
+        37,
+        0,
+        99,
+        0,
+        0
+      ],
+      [
+        9,
+        54,
+        0,
+        4,
+        0,
+        4
+      ],
+      [
+        31,
+        132,
+        0,
+        0,
+        0,
+        1
+      ]
+    ]
+  },
+  "held_out_test": {
+    "examples": 1477,
+    "accuracy": 0.7413676371022343,
+    "macro_precision": 0.43800852664330353,
+    "macro_recall": 0.43365942723357614,
+    "macro_f1": 0.41617391665977604,
+    "weighted_f1": 0.6725647089654149,
+    "classes": [
+      "en",
+      "kn",
+      "location",
+      "mixed",
+      "name",
+      "other"
+    ],
+    "classification_report": {
+      "en": {
+        "precision": 0.8155555555555556,
+        "recall": 0.8717339667458432,
+        "f1-score": 0.8427095292766934,
+        "support": 421.0
+      },
+      "kn": {
+        "precision": 0.6949339207048458,
+        "recall": 0.9546142208774584,
+        "f1-score": 0.804333970681963,
+        "support": 661.0
+      },
+      "location": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 17.0
+      },
+      "mixed": {
+        "precision": 0.8867924528301887,
+        "recall": 0.7580645161290323,
+        "f1-score": 0.8173913043478261,
+        "support": 124.0
+      },
+      "name": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 83.0
+      },
+      "other": {
+        "precision": 0.23076923076923078,
+        "recall": 0.017543859649122806,
+        "f1-score": 0.03260869565217391,
+        "support": 171.0
+      },
+      "accuracy": 0.7413676371022343,
+      "macro avg": {
+        "precision": 0.43800852664330353,
+        "recall": 0.43365942723357614,
+        "f1-score": 0.41617391665977604,
+        "support": 1477.0
+      },
+      "weighted avg": {
+        "precision": 0.6446337258546201,
+        "recall": 0.7413676371022343,
+        "f1-score": 0.6725647089654149,
+        "support": 1477.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        367,
+        51,
+        0,
+        2,
+        0,
+        1
+      ],
+      [
+        24,
+        631,
+        0,
+        4,
+        0,
+        2
+      ],
+      [
+        7,
+        9,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        6,
+        24,
+        0,
+        94,
+        0,
+        0
+      ],
+      [
+        9,
+        65,
+        0,
+        3,
+        0,
+        6
+      ],
+      [
+        37,
+        128,
+        0,
+        3,
+        0,
+        3
+      ]
+    ]
+  },
+  "test_data_note": "held_out_test is the derived record-level split; official test remains a separate evaluation only.",
+  "official_test": {
+    "examples": 4585,
+    "accuracy": 0.8394765539803708,
+    "macro_precision": 0.43680368482622695,
+    "macro_recall": 0.44202233653955786,
+    "macro_f1": 0.43200361404346327,
+    "weighted_f1": 0.7972531705913388,
+    "classes": [
+      "en",
+      "kn",
+      "location",
+      "mixed",
+      "name",
+      "other"
+    ],
+    "classification_report": {
+      "en": {
+        "precision": 0.9074371321562332,
+        "recall": 0.9354660783232212,
+        "f1-score": 0.9212384573601303,
+        "support": 1813.0
+      },
+      "kn": {
+        "precision": 0.8044066486277541,
+        "recall": 0.9484958979033729,
+        "f1-score": 0.8705291779962351,
+        "support": 2194.0
+      },
+      "location": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 31.0
+      },
+      "mixed": {
+        "precision": 0.6736842105263158,
+        "recall": 0.6881720430107527,
+        "f1-score": 0.6808510638297872,
+        "support": 93.0
+      },
+      "name": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 354.0
+      },
+      "other": {
+        "precision": 0.23529411764705882,
+        "recall": 0.08,
+        "f1-score": 0.11940298507462686,
+        "support": 100.0
+      },
+      "accuracy": 0.8394765539803708,
+      "macro avg": {
+        "precision": 0.43680368482622695,
+        "recall": 0.44202233653955786,
+        "f1-score": 0.43200361404346327,
+        "support": 4585.0
+      },
+      "weighted avg": {
+        "precision": 0.7625373502796503,
+        "recall": 0.8394765539803708,
+        "f1-score": 0.7972531705913388,
+        "support": 4585.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        1696,
+        107,
+        0,
+        6,
+        0,
+        4
+      ],
+      [
+        93,
+        2081,
+        0,
+        13,
+        0,
+        7
+      ],
+      [
+        11,
+        19,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        2,
+        27,
+        0,
+        64,
+        0,
+        0
+      ],
+      [
+        38,
+        290,
+        0,
+        11,
+        0,
+        15
+      ],
+      [
+        29,
+        63,
+        0,
+        0,
+        0,
+        8
+      ]
+    ]
+  },
+  "model_path": "C:\\Users\\NAGABHOOSHAN\\Downloads\\kannada-english-assistant\\models\\language_id_transformer"
+}

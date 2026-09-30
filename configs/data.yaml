@@ -1,0 +1,20 @@
+paths:
+  raw_dir: data/raw/coli_kanglish
+  processed_dir: data/processed/language_id
+  exploration_dir: reports/data_exploration
+
+# Set these when the source files use nonstandard names. Otherwise, common names
+# (tokens/words and labels/tags) are detected automatically.
+columns:
+  tokens: null
+  labels: null
+  text: null
+  source_id: null
+
+split:
+  train: 0.8
+  validation: 0.1
+  test: 0.1
+  seed: 42
+
+near_duplicate_similarity: 0.90
