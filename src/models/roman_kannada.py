@@ -193,11 +193,24 @@ class RomanKannadaConverter:
                 unmatched += 1
         output: list[str] = []
         cursor = 0
+        previous_token: dict[str, Any] | None = None
         for token in tokens:
             start, end = token["start"], token["end"]
-            output.append(text[cursor:start])
+            gap = text[cursor:start]
+            if (
+                gap == "-"
+                and previous_token is not None
+                and (previous_token["start"], previous_token["end"]) in replacements
+                and (start, end) in replacements
+                and str(token["text"]).casefold() in {"ge", "ige"}
+            ):
+                # Join a Kannada case marker directly to a Kannada-rendered
+                # English loanword: "meeting-ge" -> "ಮೀಟಿಂಗ್‌ಗೆ".
+                gap = ""
+            output.append(gap)
             output.append(replacements.get((start, end), text[start:end]))
             cursor = end
+            previous_token = token
         output.append(text[cursor:])
         result = "".join(output)
         total = matched + unmatched
