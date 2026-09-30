@@ -11,8 +11,8 @@ import regex as unicode_regex
 
 from src.inference.entity_extractor import extract_entities
 from src.data.coli import load_config
+from src.models.gemini_translator import GeminiTranslator
 from src.models.normalizer import LexiconNormalizer
-from src.models.openai_translator import OpenAITranslator
 from src.models.roman_kannada import COMMON_WORDS, RomanKannadaConverter
 from src.models.translator import IndicTransTranslator, TranslationUnavailableError
 from src.support.ai_support import GeminiSupport
@@ -77,7 +77,7 @@ class AssistantPipeline:
         translation_config_path = project_root / "configs/translation.yaml"
         translation_config = load_config(translation_config_path) if translation_config_path.is_file() else {}
         self.translator = IndicTransTranslator(project_root, translation_config)
-        self.openai_translator = OpenAITranslator()
+        self.gemini_translator = GeminiTranslator()
 
         baseline_path = project_root / "models/language_id_baseline.joblib"
         transformer_path = project_root / "models/language_id_transformer"
@@ -210,9 +210,13 @@ class AssistantPipeline:
         if request_translation:
             try:
                 source_text = normalized["text"] if source_language.casefold() in {"kn", "kannada", "kan_knda"} else text
-                translation_backend = os.getenv("TRANSLATION_BACKEND", "openai").strip().casefold()
+                translation_backend = os.getenv("TRANSLATION_BACKEND", "gemini").strip().casefold()
+                # Older deployment instructions used "openai" before the
+                # free-tier Gemini backend became the default.
                 if translation_backend == "openai":
-                    translated_text = self.openai_translator.translate(
+                    translation_backend = "gemini"
+                if translation_backend == "gemini":
+                    translated_text = self.gemini_translator.translate(
                         text, source_language, target_language, normalized_source=source_text,
                     )
                 elif translation_backend == "indictrans":
@@ -221,7 +225,7 @@ class AssistantPipeline:
                     )
                 else:
                     raise TranslationUnavailableError(
-                        "TRANSLATION_BACKEND must be 'openai' or 'indictrans'."
+                        "TRANSLATION_BACKEND must be 'gemini' or 'indictrans'."
                     )
                 translation = {
                     "status": "translated", "backend": translation_backend, "source_language": source_language,

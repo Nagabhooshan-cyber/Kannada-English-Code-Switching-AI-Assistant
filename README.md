@@ -18,13 +18,13 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-The base installation includes the FastAPI site, optional Gemini support, and the OpenAI SDK for API-backed translation. IndicTrans2's large local inference dependencies remain optional and are listed in `requirements-translation.txt`.
+The base installation includes the FastAPI site and Gemini support for optional translation and uncertainty checks. IndicTrans2's large local inference dependencies remain optional and are listed in `requirements-translation.txt`.
 
 For local Hugging Face access, copy `.env.example` to `.env` and put your read token in `HF_TOKEN`, or authenticate with `hf auth login`. The `.env` file is ignored by Git. Never paste a token into source code, a notebook, a public issue, or a chat. For hosted deployments, configure `HF_TOKEN` in the hosting provider's private environment/secrets settings; do not upload `.env`.
 
 ### Optional Gemini AI support
 
-The local models and rules remain the primary language identification, normalization, intent, and entity components. Translation uses OpenAI by default to avoid loading a large model on small hosted instances. After local analysis, a small uncertainty check may ask Gemini for a second opinion about unknown/low-confidence words or likely named entities. Gemini cannot supply the user-facing translation, intent, or a conversational answer. High-confidence support may refine a language label or add a supported named entity; weak or unavailable support leaves local results in place.
+The local models and rules remain the primary language identification, normalization, intent, and entity components. Translation uses a separate Gemini API call by default to avoid loading a large model on small hosted instances. After local analysis, the uncertainty-support component may independently ask Gemini for a second opinion about unknown/low-confidence words or likely named entities. The support component cannot supply intent or a conversational answer. High-confidence support may refine a language label or add a supported named entity; weak or unavailable support leaves local results in place.
 
 Copy `.env.example` to `.env` and add a Gemini API key obtained from Google AI Studio as `GEMINI_API_KEY`. Optionally set `GEMINI_MODEL`; the default is `gemini-3.8-flash`. The key is read only by the backend and must never be committed, placed in browser code, or included in a deployment image. `.env` is gitignored. Google Search grounding is enabled only when a likely proper noun or entity needs outside identification; ordinary confident words do not trigger search. Search results are used as entity evidence, not as a general search or question-answering feature.
 
@@ -42,7 +42,7 @@ The exploration report includes example/token counts, observed class and token d
 
 ## Project status
 
-Implemented: data preparation and exploration, character n-gram and MuRIL training scripts, starter normalization/intent/entity components, OpenAI API translation, optional local IndicTrans2 translation, a local web interface/API, and optional Gemini support. Evaluation summaries are in `reports/`. This checkout does not include source datasets or trained model weights, so training and some model-backed features require the user to supply the licensed data and model artifacts. Docker preparation is included; hosted translation needs a private `OPENAI_API_KEY` secret.
+Implemented: data preparation and exploration, character n-gram and MuRIL training scripts, starter normalization/intent/entity components, Gemini API translation, optional local IndicTrans2 translation, a local web interface/API, and optional Gemini support. Evaluation summaries are in `reports/`. This checkout does not include source datasets or trained model weights, so training and some model-backed features require the user to supply the licensed data and model artifacts. Hosted translation uses the private `GEMINI_API_KEY` secret.
 
 Run the baseline with:
 
@@ -131,13 +131,13 @@ It currently recognizes a small set of relative dates, numeric times, common act
 
 ## Kannada–English translation
 
-The app uses the OpenAI Responses API for translation by default, which avoids loading large model weights on small hosting instances. Copy `.env.example` to `.env`, set `OPENAI_API_KEY`, and optionally set `OPENAI_MODEL` (default: `gpt-4o-mini`). On Render, add these as private environment variables; never put the key in frontend code or commit it. Translation sends the submitted sentence and its local Kannada-script hint to OpenAI, so API usage may be billed and user text is shared with the provider. The API call sets `store=False`; review the provider's current data controls before sending sensitive text.
+The app uses Gemini 3.1 Flash-Lite for translation by default, avoiding large model downloads on small hosting instances. The current Google pricing page lists text input and output for this model as free on the Gemini API free tier, subject to per-account rate limits and availability. Configure `GEMINI_API_KEY` and optionally `GEMINI_TRANSLATION_MODEL` (default: `gemini-3.1-flash-lite`) as private host environment variables. Translation sends the submitted sentence and its local Kannada-script hint to Google. Google's free-tier terms state that submitted data may be used to improve its products, so do not send sensitive text on the free tier.
 
 ```powershell
 python scripts/run_pipeline.py "Nale meeting-ge hogbeku" --translate --source-language kn --target-language en
 ```
 
-For a local IndicTrans2 alternative, set `TRANSLATION_BACKEND=indictrans`, install `requirements-translation.txt`, accept the Hugging Face checkpoint access conditions, and configure `HF_TOKEN`. This backend downloads and runs large local checkpoints and is unsuitable for Render's 512 MB free instance. The hosted default (`TRANSLATION_BACKEND=openai`) does not need the IndicTrans2 dependencies.
+For a local IndicTrans2 alternative, set `TRANSLATION_BACKEND=indictrans`, install `requirements-translation.txt`, accept the Hugging Face checkpoint access conditions, and configure `HF_TOKEN`. This backend downloads and runs large local checkpoints and is unsuitable for Render's 512 MB free instance. The hosted default (`TRANSLATION_BACKEND=gemini`) does not need the IndicTrans2 dependencies. The Gemini API's free tier has rate limits; check the account's current quota in AI Studio.
 
 ## HTTP API
 
@@ -158,9 +158,9 @@ Open `http://127.0.0.1:8000/` for the user interface or `http://127.0.0.1:8000/d
 }
 ```
 
-For deployment, use the start command `uvicorn src.api.main:app --host 0.0.0.0 --port $PORT` where the hosting provider supplies `PORT`. Set `OPENAI_API_KEY` for hosted translation and `GEMINI_API_KEY` for optional uncertainty support. Set `HF_TOKEN` only when needed, and optionally configure `OPENAI_MODEL`, `GEMINI_MODEL`, or `LANGUAGE_BACKEND` in the host's private environment settings. Do not upload `.env`. The service code is in `src/api/main.py`.
+For deployment, use the start command `uvicorn src.api.main:app --host 0.0.0.0 --port $PORT` where the hosting provider supplies `PORT`. Set `GEMINI_API_KEY` for hosted translation and optional uncertainty support. Set `HF_TOKEN` only when needed, and optionally configure `GEMINI_TRANSLATION_MODEL`, `GEMINI_MODEL`, or `LANGUAGE_BACKEND` in the host's private environment settings. Do not upload `.env`. The service code is in `src/api/main.py`.
 
-The web interface and API are implemented. Model weights and datasets stay out of Git; a fresh clone therefore reports missing language models until they are supplied through an appropriate deployment artifact or model registry. The default hosted translation uses the OpenAI API; local IndicTrans2 remains optional and requires gated checkpoint access. Check dataset licenses before distributing dataset files separately.
+The web interface and API are implemented. Model weights and datasets stay out of Git; a fresh clone therefore reports missing language models until they are supplied through an appropriate deployment artifact or model registry. The default hosted translation uses the Gemini API; local IndicTrans2 remains optional and requires gated checkpoint access. Check dataset licenses before distributing dataset files separately.
 
 ### Container deployment preparation
 
