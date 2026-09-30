@@ -5,8 +5,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY requirements.txt ./requirements.txt
-RUN python -m pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt requirements-translation.txt ./
+RUN python -m pip install --no-cache-dir -r requirements-translation.txt
 
 COPY configs ./configs
 COPY src ./src

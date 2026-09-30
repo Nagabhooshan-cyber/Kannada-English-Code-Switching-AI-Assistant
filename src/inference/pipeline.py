@@ -12,7 +12,7 @@ import regex as unicode_regex
 from src.inference.entity_extractor import extract_entities
 from src.data.coli import load_config
 from src.models.normalizer import LexiconNormalizer
-from src.models.roman_kannada import RomanKannadaConverter
+from src.models.roman_kannada import COMMON_WORDS, RomanKannadaConverter
 from src.models.translator import IndicTransTranslator, TranslationUnavailableError
 from src.support.ai_support import GeminiSupport
 from src.support.decision import decide_support
@@ -36,6 +36,7 @@ COMMON_ENGLISH_WORDS = {
     "was", "we", "were", "what", "when", "where", "which", "who", "will", "with",
     "would", "you", "your", "remind", "tomorrow", "today", "issue",
 }
+KNOWN_ROMAN_KANNADA_WORDS = {word.casefold() for word in COMMON_WORDS}
 
 
 def _split_kannada_suffix(token: str, start: int) -> list[tuple[str, int, int, bool]]:
@@ -125,6 +126,16 @@ class AssistantPipeline:
             elif token.casefold() in COMMON_ENGLISH_WORDS:
                 labels[index] = "en"
                 confidences[index] = 0.99
+            elif token.casefold() in KNOWN_ENGLISH_BASES:
+                # Keep common English nouns usable when the trained model artifact
+                # is not present in a lightweight hosted image.
+                labels[index] = "en"
+                confidences[index] = 0.95
+            elif token.casefold() in KNOWN_ROMAN_KANNADA_WORDS:
+                # A small vocabulary fallback prevents common Kannada words from
+                # becoming unknown when a deployment has no model artifact.
+                labels[index] = "kn"
+                confidences[index] = 0.95
             elif self.language_backend != "unavailable":
                 eligible.append(index)
         if not eligible:
