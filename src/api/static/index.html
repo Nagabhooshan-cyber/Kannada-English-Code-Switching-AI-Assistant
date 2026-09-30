@@ -134,7 +134,26 @@
             target_language: document.querySelector('#target').value
           })
         });
-        const data = await response.json();
+        const responseText = await response.text();
+        let data;
+        let validJson = true;
+        try {
+          data = responseText ? JSON.parse(responseText) : {};
+        } catch (_) {
+          data = {};
+          validJson = false;
+        }
+        if (!responseText.trim()) {
+          throw new Error(
+            'The server returned an empty response. It may have restarted or run out of memory while loading translation. Try again without translation, then check the hosting logs.'
+          );
+        }
+        if (!validJson) {
+          throw new Error(`The server returned an incomplete or non-JSON response (HTTP ${response.status}). Check the hosting logs.`);
+        }
+        if (!response.ok && !data.detail) {
+          throw new Error(`The server could not complete this request (HTTP ${response.status}). Check the hosting logs.`);
+        }
         if (!response.ok) throw new Error(data.detail || 'The request could not be completed.');
 
         const componentStatuses = Object.values(data.component_status || {});
